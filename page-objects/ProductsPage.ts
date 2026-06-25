@@ -3,13 +3,17 @@ import CommonPage from "./CommonPage";
 
 class ProductsPage extends CommonPage {
     readonly productsItems:Locator;
+    readonly continueShoppingBtn:Locator;
+    readonly viewCartLnk:Locator;
 
     constructor(public readonly page:Page) {
         super(page);
         this.productsItems = page.locator('.features_items');
+        this.continueShoppingBtn = page.getByRole('button', { name: 'Continue Shopping' });
+        this.viewCartLnk = page.getByRole('link', { name: 'View Cart' });
     }
 
-    //typescriot require you to declare what is the type of the return you are going to return, so this is why the Promise below is set
+    //typescript require you to declare what is the type of the return you are going to return, so this is why the Promise below is set
     async getItem(itemName:string): Promise<Locator> {
         const singleItem = this.productsItems.filter({ hasText: itemName });
         await expect(singleItem).toBeVisible();
@@ -18,14 +22,26 @@ class ProductsPage extends CommonPage {
 
     async getItemPrice(item:Locator): Promise<number>  {
         const price = await item.locator('h2').textContent();
-        // ?? is as same for coalesce in cobol where if the left value is null or undefined then it will return the right value otherwise it will return the left value
+        
+        // ?? is as same for coalesce in cobol where if the left value is null
+        // or undefined then it will return the right value otherwise it will return the left value
         return parseFloat((price ?? '0').replace('Rs. ', ''));
     }
 
     async addItemToCart(item:Locator){
         const addToCartBtn = item.locator('.btn btn-default add-to-cart');
         await addToCartBtn.click();
+        await expect(this.viewCartLnk).toBeVisible();
     }
+
+    async viewCart(){
+        await this.viewCartLnk.click();
+    }
+
+    async continueShopping(){
+        await this.continueShoppingBtn.click();
+    }
+
 }
 
 export default ProductsPage;
