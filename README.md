@@ -9,7 +9,7 @@ End-to-end and API test suite for the [Automation Exercise](https://automationex
 
 This is the second project in my automation portfolio. While [plwrLabSauce](https://github.com/giovanisop/plwrLabSauce) focuses on BDD/Cucumber and storageState-based session management, this project demonstrates a native Playwright test runner approach with TypeScript and REST API validation.
 
-> 🚧 **Work in progress** — project structure and test coverage are actively being built out.
+> 🚧 **Work in progress** — test coverage is actively being expanded.
 
 ---
 
@@ -19,6 +19,7 @@ This is the second project in my automation portfolio. While [plwrLabSauce](http
 |---|---|
 | [Playwright](https://playwright.dev) | Browser automation & API testing |
 | [TypeScript](https://www.typescriptlang.org) | Type-safe test authoring |
+| [@faker-js/faker](https://fakerjs.dev) | Random test data generation |
 | [Node.js](https://nodejs.org) | Runtime |
 | [GitHub Actions](https://github.com/features/actions) | CI/CD pipeline |
 
@@ -30,12 +31,63 @@ This is the second project in my automation portfolio. While [plwrLabSauce](http
 plwrTSAutomationExercise/
 ├── .github/
 │   └── workflows/
-│       └── playwright.yml        # CI/CD pipeline definition
-├── tests/                        # Test specs (structure evolving)
-├── page-objects/                 # Page Object Model classes
-├── playwright.config.ts          # Playwright configuration
+│       └── playwright.yml           # CI/CD pipeline definition
+├── fixtures/
+│   └── auth.fixture.ts              # Custom Playwright fixtures
+├── hooks/
+│   └── hooks.ts                     # Global test hooks
+├── page-objects/
+│   ├── CommonPage.ts                # Base class with shared generic methods
+│   ├── HomePage.ts                  # Home page
+│   ├── LoginPage.ts                 # Login / Signup entry page
+│   ├── SignupPage.ts                # Account registration form
+│   ├── AccountCreatedPage.ts        # Post-registration confirmation
+│   ├── AccountDeletedPage.ts        # Post-deletion confirmation
+│   ├── CartPage.ts                  # Shopping cart
+│   └── ProductsPage.ts             # Products listing
+├── test-data/
+│   ├── userFactory.ts               # Faker-powered random user generator
+│   └── credentials.ts               # Static credentials (env-backed)
+├── tests/
+│   └── userRegistration.spec.ts     # E2E: User registration scenario
+├── playwright.config.ts
 └── package.json
 ```
+
+---
+
+## 🧱 Architecture
+
+### Page Object Model with `CommonPage` base class
+
+All page objects extend `CommonPage`, which centralises reusable interaction methods so individual page classes only declare locators and page-specific logic:
+
+| Method | Description |
+|---|---|
+| `clickBtnLnk(locator)` | Click any button or link |
+| `fillTextBox(field, value)` | Fill any input field |
+| `selectOption(list, option)` | Select a `<select>` option by label |
+| `selectRadio(radio)` | Check a radio button |
+| `toggleCheckBox(checkbox)` | Toggle a checkbox |
+| `checkVisibility(locator)` | Assert that an element is visible |
+| `checkUserLogged(user)` | Assert the logged-in username in the navbar |
+| `verifyPage(url)` | Assert the current page URL |
+
+`CommonPage` also exposes shared navbar locators (Home, Cart, Login, Products, Delete Account, Logout) available in every page object.
+
+### Random test data with `userFactory`
+
+`generateNewUser()` uses `@faker-js/faker` to produce a fully randomised user on every test run — email, password, full name, address, birth date, phone, and company — ensuring tests never depend on static data and can run concurrently without conflicts.
+
+---
+
+## ✅ Test Scenarios
+
+| Scenario | File | Status |
+|---|---|---|
+| User Registration | `tests/userRegistration.spec.ts` | ✅ Passing |
+
+Each scenario is broken into `test.step()` blocks that match the original test case steps, making reports readable without needing to inspect the code.
 
 ---
 
@@ -71,6 +123,9 @@ npx playwright test --ui
 
 # Run with headed browser
 npx playwright test --headed
+
+# Open the HTML report after a run
+npx playwright show-report
 ```
 
 ---
