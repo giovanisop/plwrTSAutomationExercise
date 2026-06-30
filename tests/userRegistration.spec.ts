@@ -1,15 +1,15 @@
-//userregistration.specs.ts
-import { test } from '@playwright/test';
+
+import { test } from '../fixtures/userFixture';
 import {generateNewUser} from '../test-data/userFactory';
 import HomePage from '../page-objects/HomePage';
 import LoginPage from '../page-objects/LoginPage';
 import SignUpPage from '../page-objects/SignupPage';
 import AccountCreatedPage from '../page-objects/AccountCreatedPage';
 import AccountDeletedPage from '../page-objects/AccountDeletedPage';
-import UserAPI from '../api-utils/UserAPI';
+import * as globalSteps from '../common-steps/globalSteps';
+import * as userRegSteps from '../common-steps/userRegSteps';
 
-
-test('Scenario - User Registration [E2E]', async ({ page }) => {
+test('Scenario - User Registration [E2E]', {tag: '@login'}, async ({ page }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
     const signupPage = new SignUpPage(page);
@@ -17,22 +17,19 @@ test('Scenario - User Registration [E2E]', async ({ page }) => {
     const accountCreatedPage = new AccountCreatedPage(page);
     const newUser = generateNewUser();
 
-    await test.step("Given I Go to page automationexercise.com", async () => {    
-        await page.goto('https://automationexercise.com');
-    });
-    await test.step("Click on 'Signup / Login' button", async () => {    
-        await homePage.clickBtnLnk(homePage.loginPageLnk);
-    });    
-    await test.step("And Verify 'New User Signup!' is visible", async () => {
-        await loginPage.checkVisibility(loginPage.signupTitle);
-    }); 
+
+    await globalSteps.navigateToHome(page);
+    await globalSteps.checkHomePage(homePage);
+    await userRegSteps.clickSignupLogin(homePage);
+    await userRegSteps.checkLoginPage(loginPage);
+    
     await test.step("When Enter name and email adress", async () => {
         await loginPage.fillTextBox( loginPage.signupEmail, newUser.email);
         await loginPage.fillTextBox( loginPage.signupName, newUser.name);
     });
-    await test.step("And Click 'Signup' button", async () => {
-        await loginPage.clickBtnLnk(loginPage.signupBtn);
-    });
+
+    await userRegSteps.clickSignUpBtn(loginPage);
+    
     await test.step("Then I Verify that 'ENTER ACCOUNT INFORMATION' is visible", async () => {
         await signupPage.checkVisibility(signupPage.accountInfoTxt);
     });
@@ -75,9 +72,9 @@ test('Scenario - User Registration [E2E]', async ({ page }) => {
     await test.step("When Click 'Continue' button", async () => {
         await accountCreatedPage.clickBtnLnk(accountCreatedPage.continueBtn);
     });
-    await test.step("Then Verify that 'Logged in as username' is visible", async () => {
-        await homePage.checkUserLogged(newUser.name);
-    });
+    
+    await userRegSteps.checkLoggedUser(homePage,newUser);
+    
     await test.step("When Click 'Delete Account' button", async () => {
         await homePage.clickBtnLnk(homePage.deleteAccLnk);
     });
@@ -90,34 +87,24 @@ test('Scenario - User Registration [E2E]', async ({ page }) => {
 
 });
 
-test('Scenario - Register User with existing email [E2E + API]', async ({ page }) => {
+test('Scenario - Register User with existing email [E2E + API]', {tag: '@login'}, async ({ page , userAPI }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
-    const userAPI = new UserAPI();
     
-    await test.step("Given Ihave already created an user'", async () => {   
-        //pre user creation using 
-        await userAPI.setNewUser();
-    });
-    await test.step("And I Navigate to url 'http://automationexercise.com'", async () => {   
-        await page.goto('https://automationexercise.com');
-    });    
-    await test.step("When Click on 'Signup / Login' button", async () => {   
-        await homePage.clickBtnLnk(homePage.loginPageLnk);      
-    });
-    await test.step("Then Verify 'New User Signup!' is visible", async () => {   
-        await loginPage.checkVisibility(loginPage.signupTitle);
-    });
+    await globalSteps.navigateToHome(page);
+    await globalSteps.checkHomePage(homePage);
+    await userRegSteps.clickSignupLogin(homePage);
+    await userRegSteps.checkLoginPage(loginPage);
+
     await test.step("when I Enter name and already registered email address", async () => {   
         await loginPage.fillTextBox(loginPage.signupEmail, userAPI.user.email);
         await loginPage.fillTextBox(loginPage.signupName, userAPI.user.name);
     });
-    await test.step("And Click 'Signup' button", async () => {   
-        await loginPage.clickBtnLnk(loginPage.signupBtn);
-    });
+
+    await userRegSteps.clickSignUpBtn(loginPage);
+
     await test.step("Then Verify error 'Email Address already exist!' is visible", async () => {   
         await loginPage.checkVisibility(loginPage.emailAlreadyExistMsg);
-        await userAPI.deleteUser(userAPI.user);
     });
 
 });

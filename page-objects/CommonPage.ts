@@ -16,7 +16,7 @@ class CommonPage {
         this.loginPageLnk = page.getByRole('link', { name: ' Signup / Login' });
         this.productsPageLnk = page.getByRole('link', { name: ' Products' });
         this.deleteAccLnk = page.getByRole('link', {name : 'Delete Account'});
-        this.logoutLnk = page.getByRole('link', {name : 'Delete Account'});
+        this.logoutLnk = page.getByRole('link', {name : 'Logout'});
         this.userLogged = page.locator('.navbar-nav li').filter({ hasText: 'Logged in as' }).locator('b');
     }
 

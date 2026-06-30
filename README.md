@@ -34,8 +34,12 @@ plwrTSAutomationExercise/
 │       └── playwright.yml           # CI/CD pipeline definition
 ├── api-utils/
 │   └── UserAPI.ts                   # Playwright API request wrapper for user operations
+├── common-steps/
+│   ├── globalSteps.ts               # Reusable steps shared across all specs (navigation, home page)
+│   └── userRegSteps.ts              # Reusable steps specific to registration/login flows
 ├── fixtures/
-│   └── auth.fixture.ts              # Custom Playwright fixtures
+│   ├── auth.fixture.ts              # Custom Playwright fixtures
+│   └── userFixture.ts               # Fixture that creates a user via API before each test and deletes after
 ├── hooks/
 │   └── hooks.ts                     # Global test hooks
 ├── page-objects/
@@ -51,7 +55,8 @@ plwrTSAutomationExercise/
 │   ├── userFactory.ts               # Faker-powered random user generator
 │   └── credentials.ts               # Static credentials (env-backed)
 ├── tests/
-│   └── userRegistration.spec.ts     # E2E and E2E+API user registration scenarios
+│   ├── userRegistration.spec.ts     # E2E and E2E+API user registration scenarios
+│   └── userLogin.spec.ts            # E2E and E2E+API user login/logout scenarios
 ├── playwright.config.ts
 └── package.json
 ```
@@ -85,6 +90,14 @@ All page objects extend `CommonPage`, which centralises reusable interaction met
 
 `UserAPI` wraps Playwright's built-in `request` context to interact with the automationexercise.com REST API directly. It is used in hybrid E2E+API scenarios to set up or tear down state (create/delete accounts) without going through the browser, keeping tests faster and more reliable. All endpoints use `application/x-www-form-urlencoded` as the request content type.
 
+### Playwright Fixture for API-managed user lifecycle
+
+`userFixture.ts` extends the native Playwright `test` with a `userAPI` fixture that automatically creates a user via API before the test runs and deletes it after — including on test failure. Tests that inject `userAPI` get a ready-to-use account with no manual setup or teardown. Tests that manage their own user lifecycle (e.g. deleting via the UI) skip the fixture and instantiate `UserAPI` directly.
+
+### Reusable step helpers in `common-steps`
+
+Common `test.step()` blocks that repeat across multiple specs are extracted into helper functions in the `common-steps` folder, keeping individual spec files lean. `globalSteps.ts` holds cross-domain steps (navigation, home page checks); `userRegSteps.ts` holds steps specific to the registration and login flows.
+
 ---
 
 ## ✅ Test Scenarios
@@ -93,10 +106,13 @@ All page objects extend `CommonPage`, which centralises reusable interaction met
 |---|---|---|---|
 | User Registration | E2E | `tests/userRegistration.spec.ts` | ✅ Passing |
 | Register User with existing email | E2E + API | `tests/userRegistration.spec.ts` | ✅ Passing |
+| Login User with correct email and password | E2E + API | `tests/userLogin.spec.ts` | ✅ Passing |
+| Login User with incorrect email and password | E2E + API | `tests/userLogin.spec.ts` | ✅ Passing |
+| Logout User | E2E + API | `tests/userLogin.spec.ts` | ✅ Passing |
 
 Each scenario is broken into `test.step()` blocks that match the original test case steps, making reports readable without needing to inspect the code.
 
-The **E2E + API** scenario uses `UserAPI` to create the user via REST API as a precondition, then validates the duplicate email error through the browser UI — demonstrating UI/API integration testing patterns.
+**E2E + API** scenarios use `UserAPI` to set up (and tear down) the user account via REST API, while the browser validates the UI behaviour — demonstrating UI/API integration testing patterns.
 
 ---
 

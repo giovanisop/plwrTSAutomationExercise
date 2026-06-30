@@ -10,6 +10,7 @@ class LoginPage extends CommonPage {
     readonly signupEmail:Locator;
     readonly signupTitle:Locator;
     readonly emailAlreadyExistMsg:Locator;
+    readonly wrongloginMsg:Locator;
 
     constructor(public readonly page:Page) {
         super(page);
@@ -21,6 +22,7 @@ class LoginPage extends CommonPage {
         this.signupEmail = page.locator('[data-qa="signup-email"]');
         this.signupTitle = page.getByText('New User Signup!');
         this.emailAlreadyExistMsg = page.getByText('Email Address already exist!');
+        this.wrongloginMsg = page.getByText("Your email or password is incorrect!");
     }
 
 }
