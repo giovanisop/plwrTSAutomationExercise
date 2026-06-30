@@ -32,6 +32,8 @@ plwrTSAutomationExercise/
 ├── .github/
 │   └── workflows/
 │       └── playwright.yml           # CI/CD pipeline definition
+├── api-utils/
+│   └── UserAPI.ts                   # Playwright API request wrapper for user operations
 ├── fixtures/
 │   └── auth.fixture.ts              # Custom Playwright fixtures
 ├── hooks/
@@ -49,7 +51,7 @@ plwrTSAutomationExercise/
 │   ├── userFactory.ts               # Faker-powered random user generator
 │   └── credentials.ts               # Static credentials (env-backed)
 ├── tests/
-│   └── userRegistration.spec.ts     # E2E: User registration scenario
+│   └── userRegistration.spec.ts     # E2E and E2E+API user registration scenarios
 ├── playwright.config.ts
 └── package.json
 ```
@@ -79,15 +81,22 @@ All page objects extend `CommonPage`, which centralises reusable interaction met
 
 `generateNewUser()` uses `@faker-js/faker` to produce a fully randomised user on every test run — email, password, full name, address, birth date, phone, and company — ensuring tests never depend on static data and can run concurrently without conflicts.
 
+### API utility layer with `UserAPI`
+
+`UserAPI` wraps Playwright's built-in `request` context to interact with the automationexercise.com REST API directly. It is used in hybrid E2E+API scenarios to set up or tear down state (create/delete accounts) without going through the browser, keeping tests faster and more reliable. All endpoints use `application/x-www-form-urlencoded` as the request content type.
+
 ---
 
 ## ✅ Test Scenarios
 
-| Scenario | File | Status |
-|---|---|---|
-| User Registration | `tests/userRegistration.spec.ts` | ✅ Passing |
+| Scenario | Type | File | Status |
+|---|---|---|---|
+| User Registration | E2E | `tests/userRegistration.spec.ts` | ✅ Passing |
+| Register User with existing email | E2E + API | `tests/userRegistration.spec.ts` | ✅ Passing |
 
 Each scenario is broken into `test.step()` blocks that match the original test case steps, making reports readable without needing to inspect the code.
+
+The **E2E + API** scenario uses `UserAPI` to create the user via REST API as a precondition, then validates the duplicate email error through the browser UI — demonstrating UI/API integration testing patterns.
 
 ---
 
