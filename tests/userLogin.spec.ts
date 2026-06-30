@@ -12,6 +12,11 @@ test('Login User with correct email and password [E2E+API]', {tag: '@login'}, as
     const loginPage = new LoginPage(page);
     const accountDeletedPage = new AccountDeletedPage(page);
     const userAPI = new UserAPI();
+
+    await test.step("Given I already have an user created", async () => {
+        await userAPI.setNewUser();
+    });
+
     await globalSteps.navigateToHome(page);
     await globalSteps.checkHomePage(homePage);
     await userRegSteps.clickSignupLogin(homePage);
@@ -35,9 +40,14 @@ test('Login User with correct email and password [E2E+API]', {tag: '@login'}, as
     
 });
 
-test('Login User with incorrect email and password [E2E+API]', {tag: '@login'}, async ({ page , userAPI }) => {
+test('Login User with incorrect email and password [E2E+API]', {tag: '@login'}, async ({ page  }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
+    const userAPI = new UserAPI();
+    
+    await test.step("Given I already have an user created", async () => {
+        await userAPI.setNewUser();
+    });
 
     await globalSteps.navigateToHome(page);
     await globalSteps.checkHomePage(homePage);
@@ -60,7 +70,7 @@ test('Login User with incorrect email and password [E2E+API]', {tag: '@login'}, 
 test('Logout User [E2E]', {tag: '@login'}, async ({ page, userAPI }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
-
+    
     await globalSteps.navigateToHome(page);
     await globalSteps.checkHomePage(homePage);
     await userRegSteps.clickSignupLogin(homePage);
