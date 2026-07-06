@@ -34,8 +34,18 @@ class CommonPage {
         this.subscriptionBtn = page.locator('#subscribe');
     }
 
-    async verifyPage(url:string) {
+    async verifyPage(url:string, retries = 2) {
         await this.page.waitForLoadState('networkidle');
+
+        // Google Vignette ad on automationexercise.com can hijack a click and
+        // append '#google_vignette' to the current URL without navigating.
+        // Dismiss it and retry so the assertion isn't flaky on CI.
+        for (let attempt = 0; attempt < retries && this.page.url().includes('google_vignette'); attempt++) {
+            await this.page.keyboard.press('Escape');
+            await this.page.waitForTimeout(500);
+            await this.page.waitForLoadState('networkidle');
+        }
+
         await expect(this.page).toHaveURL(url);
     }
 

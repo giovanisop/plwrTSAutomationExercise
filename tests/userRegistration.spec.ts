@@ -9,7 +9,7 @@ import AccountDeletedPage from '../page-objects/AccountDeletedPage';
 import * as globalSteps from '../common-steps/globalSteps';
 import * as userRegSteps from '../common-steps/userRegSteps';
 
-test('Scenario - User Registration', {tag: ['@E2E']}, async ({ page }) => {
+test('User Registration', {tag: ['@E2E']}, async ({ page }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
     const signupPage = new SignUpPage(page);
@@ -87,7 +87,7 @@ test('Scenario - User Registration', {tag: ['@E2E']}, async ({ page }) => {
 
 });
 
-test('Scenario - Register User with existing email', {tag: ['@E2E', '@API']}, async ({ page , userAPI }) => {
+test('Register User with existing email', {tag: ['@E2E', '@API']}, async ({ page , userAPI }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
     

@@ -67,7 +67,7 @@ test('Login User with incorrect email and password', {tag: ['@E2E', '@API']}, as
     
 });
 
-test('Logout User [E2E]', {tag: '@E2E'}, async ({ page, userAPI }) => {
+test('Logout User', {tag: ['@E2E']}, async ({ page, userAPI }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
     
