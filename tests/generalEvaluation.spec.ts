@@ -111,6 +111,7 @@ test('Contact Us Form', {tag: ['@E2E']}, async ({ page, samplePdf }) => {
     await test.step("When I click 'Submit' button and accept the confirmation dialog", async () => {
         contactUsPage.page.once('dialog', dialog => dialog.accept());
         await contactUsPage.clickBtnLnk(contactUsPage.submitBtn);
+        await homePage.page.waitForLoadState('networkidle');
     });
     await test.step("Then I verify success message 'Success! Your details have been submitted successfully.' is visible", async () => {
         await contactUsPage.checkVisibility(contactUsPage.successMsg);
