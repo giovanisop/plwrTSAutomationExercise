@@ -27,7 +27,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     browserName: 'chromium',
     screenshot: 'on',
-    headless: false,
+    headless: true,
   },
 
 });
