@@ -7,7 +7,7 @@ import * as userRegSteps from '../common-steps/userRegSteps';
 import UserAPI from '../api-utils/UserAPI';
 
 
-test('Login User with correct email and password [E2E+API]', {tag: '@login'}, async ({ page }) => {
+test('Login User with correct email and password', {tag: ['@E2E', '@API']}, async ({ page }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
     const accountDeletedPage = new AccountDeletedPage(page);
@@ -40,7 +40,7 @@ test('Login User with correct email and password [E2E+API]', {tag: '@login'}, as
     
 });
 
-test('Login User with incorrect email and password [E2E+API]', {tag: '@login'}, async ({ page  }) => {
+test('Login User with incorrect email and password', {tag: ['@E2E', '@API']}, async ({ page  }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
     const userAPI = new UserAPI();
@@ -67,7 +67,7 @@ test('Login User with incorrect email and password [E2E+API]', {tag: '@login'}, 
     
 });
 
-test('Logout User [E2E]', {tag: '@login'}, async ({ page, userAPI }) => {
+test('Logout User [E2E]', {tag: '@E2E'}, async ({ page, userAPI }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
     

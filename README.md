@@ -20,6 +20,7 @@ This is the second project in my automation portfolio. While [plwrLabSauce](http
 | [Playwright](https://playwright.dev) | Browser automation & API testing |
 | [TypeScript](https://www.typescriptlang.org) | Type-safe test authoring |
 | [@faker-js/faker](https://fakerjs.dev) | Random test data generation |
+| [pdf-lib](https://pdf-lib.js.org) | Generates disposable sample PDFs for file-upload tests |
 | [Node.js](https://nodejs.org) | Runtime |
 | [GitHub Actions](https://github.com/features/actions) | CI/CD pipeline |
 
@@ -36,27 +37,36 @@ plwrTSAutomationExercise/
 │   └── UserAPI.ts                   # Playwright API request wrapper for user operations
 ├── common-steps/
 │   ├── globalSteps.ts               # Reusable steps shared across all specs (navigation, home page)
-│   └── userRegSteps.ts              # Reusable steps specific to registration/login flows
+│   ├── generalSteps.ts              # Reusable steps for scroll/subscription/general evaluation flows
+│   ├── userRegSteps.ts              # Reusable steps specific to registration/login flows
+│   ├── productsSteps.ts             # 🚧 placeholder — steps for the upcoming Products evaluation spec
+│   └── purchaseSteps.ts             # 🚧 placeholder — steps for the upcoming Purchase spec
 ├── fixtures/
 │   ├── auth.fixture.ts              # Custom Playwright fixtures
-│   └── userFixture.ts               # Fixture that creates a user via API before each test and deletes after
+│   └── userFixture.ts               # Fixtures: API-managed user lifecycle + disposable sample PDF for uploads
 ├── hooks/
 │   └── hooks.ts                     # Global test hooks
 ├── page-objects/
-│   ├── CommonPage.ts                # Base class with shared generic methods
+│   ├── CommonPage.ts                # Base class with shared generic methods (navbar links, scroll, viewport checks, subscription box)
 │   ├── HomePage.ts                  # Home page
 │   ├── LoginPage.ts                 # Login / Signup entry page
 │   ├── SignupPage.ts                # Account registration form
 │   ├── AccountCreatedPage.ts        # Post-registration confirmation
 │   ├── AccountDeletedPage.ts        # Post-deletion confirmation
 │   ├── CartPage.ts                  # Shopping cart
-│   └── ProductsPage.ts             # Products listing
+│   ├── ProductsPage.ts              # Products listing
+│   ├── ContactUsPage.ts             # Contact Us form
+│   └── TestCasesPage.ts             # Test Cases page
 ├── test-data/
 │   ├── userFactory.ts               # Faker-powered random user generator
-│   └── credentials.ts               # Static credentials (env-backed)
+│   ├── credentials.ts               # Static credentials (env-backed)
+│   └── pdfFactory.ts                # Generates/cleans up a disposable sample PDF for file-upload tests
 ├── tests/
 │   ├── userRegistration.spec.ts     # E2E and E2E+API user registration scenarios
-│   └── userLogin.spec.ts            # E2E and E2E+API user login/logout scenarios
+│   ├── userLogin.spec.ts            # E2E and E2E+API user login/logout scenarios
+│   ├── generalEvaluation.spec.ts    # E2E scroll/subscription/Test Cases/Contact Us scenarios
+│   ├── productsEvaluation.spec.ts   # 🚧 next up — scaffolded (commented out), not yet implemented
+│   └── purchase.spec.ts             # 🚧 next up — scaffolded (commented out), not yet implemented
 ├── playwright.config.ts
 └── package.json
 ```
@@ -80,7 +90,7 @@ All page objects extend `CommonPage`, which centralises reusable interaction met
 | `checkUserLogged(user)` | Assert the logged-in username in the navbar |
 | `verifyPage(url)` | Assert the current page URL |
 
-`CommonPage` also exposes shared navbar locators (Home, Cart, Login, Products, Delete Account, Logout) available in every page object.
+`CommonPage` also exposes shared navbar locators (Home, Cart, Login, Products, Contact Us, Test Cases, Delete Account, Logout) available in every page object, plus scroll (`scrollDownToFooter`) and viewport (`checkInViewport`) helpers used by the home/subscription scenarios.
 
 ### Random test data with `userFactory`
 
@@ -94,9 +104,11 @@ All page objects extend `CommonPage`, which centralises reusable interaction met
 
 `userFixture.ts` extends the native Playwright `test` with a `userAPI` fixture that automatically creates a user via API before the test runs and deletes it after — including on test failure. Tests that inject `userAPI` get a ready-to-use account with no manual setup or teardown. Tests that manage their own user lifecycle (e.g. deleting via the UI) skip the fixture and instantiate `UserAPI` directly.
 
+The same file also exposes a `samplePdf` fixture: it generates a throwaway PDF via `pdfFactory.ts` (built with `pdf-lib`) before the test and deletes it afterwards, so file-upload scenarios (e.g. the Contact Us form) never depend on a checked-in binary fixture.
+
 ### Reusable step helpers in `common-steps`
 
-Common `test.step()` blocks that repeat across multiple specs are extracted into helper functions in the `common-steps` folder, keeping individual spec files lean. `globalSteps.ts` holds cross-domain steps (navigation, home page checks); `userRegSteps.ts` holds steps specific to the registration and login flows.
+Common `test.step()` blocks that repeat across multiple specs are extracted into helper functions in the `common-steps` folder, keeping individual spec files lean. `globalSteps.ts` holds cross-domain steps (navigation, home page checks); `userRegSteps.ts` holds steps specific to the registration and login flows; `generalSteps.ts` holds scroll/subscription/viewport steps used by `generalEvaluation.spec.ts`. `productsSteps.ts` and `purchaseSteps.ts` are placeholders reserved for the next specs to be developed.
 
 ---
 
@@ -108,11 +120,21 @@ Common `test.step()` blocks that repeat across multiple specs are extracted into
 | Register User with existing email | E2E + API | `tests/userRegistration.spec.ts` | ✅ Passing |
 | Login User with correct email and password | E2E + API | `tests/userLogin.spec.ts` | ✅ Passing |
 | Login User with incorrect email and password | E2E + API | `tests/userLogin.spec.ts` | ✅ Passing |
-| Logout User | E2E + API | `tests/userLogin.spec.ts` | ✅ Passing |
+| Logout User | E2E | `tests/userLogin.spec.ts` | ✅ Passing |
+| Scroll Up (arrow button) / Scroll Down | E2E | `tests/generalEvaluation.spec.ts` | ✅ Passing |
+| Scroll Up (no arrow button) / Scroll Down | E2E | `tests/generalEvaluation.spec.ts` | ✅ Passing |
+| Subscription in Home page | E2E | `tests/generalEvaluation.spec.ts` | ✅ Passing |
+| Subscription in Cart page | E2E | `tests/generalEvaluation.spec.ts` | ✅ Passing |
+| Verify Test Cases Page | E2E | `tests/generalEvaluation.spec.ts` | ✅ Passing |
+| Contact Us Form (with file upload) | E2E | `tests/generalEvaluation.spec.ts` | ✅ Passing |
+| Products evaluation (search, cart, categories, brands, reviews) | E2E | `tests/productsEvaluation.spec.ts` | 🚧 Next up — scaffolded, not yet implemented |
+| Purchase flow (checkout, payment, invoice) | E2E | `tests/purchase.spec.ts` | 🚧 Next up — scaffolded, not yet implemented |
 
 Each scenario is broken into `test.step()` blocks that match the original test case steps, making reports readable without needing to inspect the code.
 
 **E2E + API** scenarios use `UserAPI` to set up (and tear down) the user account via REST API, while the browser validates the UI behaviour — demonstrating UI/API integration testing patterns.
+
+> `productsEvaluation.spec.ts` and `purchase.spec.ts` currently exist as commented-out scaffolds (test cases mapped step-by-step from automationexercise.com) and are the next specs to be implemented.
 
 ---
 

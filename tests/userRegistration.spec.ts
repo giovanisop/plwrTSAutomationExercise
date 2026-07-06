@@ -9,7 +9,7 @@ import AccountDeletedPage from '../page-objects/AccountDeletedPage';
 import * as globalSteps from '../common-steps/globalSteps';
 import * as userRegSteps from '../common-steps/userRegSteps';
 
-test('Scenario - User Registration [E2E]', {tag: '@login'}, async ({ page }) => {
+test('Scenario - User Registration', {tag: ['@E2E']}, async ({ page }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
     const signupPage = new SignUpPage(page);
@@ -23,7 +23,7 @@ test('Scenario - User Registration [E2E]', {tag: '@login'}, async ({ page }) => 
     await userRegSteps.clickSignupLogin(homePage);
     await userRegSteps.checkLoginPage(loginPage);
     
-    await test.step("When Enter name and email adress", async () => {
+    await test.step("When Enter name and email adress",  async () => {
         await loginPage.fillTextBox( loginPage.signupEmail, newUser.email);
         await loginPage.fillTextBox( loginPage.signupName, newUser.name);
     });
@@ -87,7 +87,7 @@ test('Scenario - User Registration [E2E]', {tag: '@login'}, async ({ page }) => 
 
 });
 
-test('Scenario - Register User with existing email [E2E + API]', {tag: '@login'}, async ({ page , userAPI }) => {
+test('Scenario - Register User with existing email', {tag: ['@E2E', '@API']}, async ({ page , userAPI }) => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
     
